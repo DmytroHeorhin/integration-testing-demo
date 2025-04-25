@@ -1,26 +1,27 @@
 using Domain.Repositories;
 using Microsoft.Extensions.Options;
+using Moq;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace UnitTests;
 
 public class DemoRepositoryTests
 {
     [Fact]
-    public void GetData_ReturnsExpectedData()
+    public async Task SaveDataAsync_InsertsMessageIntoDatabase()
     {
         // Arrange
-        var expectedData = "TestMessage";
-
+        var message = "TestMessage";
         var mockDbClient = new Mock<IDbClient>();
-        mockDbClient.Setup(m => m.QuerySingleOrDefault<string>(It.IsAny<string>()))
-                      .Returns(expectedData);
+        mockDbClient.Setup(client => client.ExecuteAsync(It.IsAny<string>(), It.IsAny<object>())).Returns(Task.CompletedTask);
 
         var repository = new DemoRepository(mockDbClient.Object);
 
         // Act
-        var result = repository.GetData();
+        await repository.SaveDataAsync(message);
 
         // Assert
-        Assert.Equal(expectedData, result);
+        mockDbClient.Verify(client => client.ExecuteAsync("INSERT INTO DemoTable (Message) VALUES (@Message)", It.IsAny<object>()), Times.Once);
     }
 }

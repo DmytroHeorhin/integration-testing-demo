@@ -2,6 +2,6 @@ namespace Domain.Repositories
 {
     public interface IDemoRepository
     {
-        string? GetData();
+        Task SaveDataAsync(string message);
     }
 }

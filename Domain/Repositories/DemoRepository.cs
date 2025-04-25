@@ -6,10 +6,10 @@ namespace Domain.Repositories
     {
         private readonly IDbClient _dbClient = dbClient;
 
-        public string? GetData()
+        public async Task SaveDataAsync(string message)
         {
-            var query = "SELECT TOP 1 Message FROM DemoTable";
-            return _dbClient.QuerySingleOrDefault<string?>(query);
+            var query = "INSERT INTO DemoTable (Message) VALUES (@Message)";
+            await _dbClient.ExecuteAsync(query, new { Message = message });
         }
     }
 }

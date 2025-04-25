@@ -14,10 +14,10 @@ namespace Domain.Repositories
                                 ?? throw new ArgumentNullException(nameof(options), "Connection string cannot be null.");
         }
 
-        public T? QuerySingleOrDefault<T>(string query)
+        public async Task ExecuteAsync(string query, object parameters)
         {
             using var connection = new SqlConnection(_connectionString);
-            return connection.QuerySingleOrDefault<T>(query);
+            await connection.ExecuteAsync(query, parameters);
         }
     }
 }

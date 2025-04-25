@@ -17,15 +17,11 @@ namespace Domain
             _messageProducer = messageProducer;
         }
 
-        public async Task<string> GetDemoMessageAsync()
+        public async Task SaveDemoMessageAsync(string message)
         {
-            var localData = _repository.GetData();
-            var remoteData = await _remoteApiService.FetchDataAsync();
-            var message = $"Local: {localData}, Remote: {remoteData}";
-
-            await _messageProducer.ProduceAsync(message);
-
-            return message;
+            var apiResponse = await _remoteApiService.FetchDataAsync(message);
+            await _repository.SaveDataAsync(apiResponse);
+            await _messageProducer.ProduceAsync(apiResponse);
         }
     }
 }

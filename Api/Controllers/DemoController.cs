@@ -1,9 +1,11 @@
 using Domain;
+using Microsoft.AspNetCore.Mvc;
+using System.ComponentModel.DataAnnotations;
 
 namespace Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("api/demo")]
     public class DemoController : ControllerBase
     {
         private readonly IDemoService _demoService;
@@ -13,11 +15,11 @@ namespace Api.Controllers
             _demoService = demoService;
         }
 
-        [HttpGet("hello")]
-        public async Task<IActionResult> GetHello()
+        [HttpPost("create")]
+        public async Task<IActionResult> CreateDemoRecord([FromBody][Required] CreateDemoRecordRequest request)
         {
-            var message = await _demoService.GetDemoMessageAsync();
-            return Ok(message);
+            await _demoService.SaveDemoMessageAsync(request.Message);
+            return Ok();
         }
     }
 }

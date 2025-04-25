@@ -12,8 +12,8 @@ builder.Services.AddHttpClient<IRemoteApiService, RemoteApiService>();
 builder.Services.AddScoped<IDbClient, DbClient>();
 
 // Register MessageProducer abstraction
-var kafkaConfig = new ProducerConfig { BootstrapServers = builder.Configuration["Kafka:BootstrapServers"] };
-builder.Services.AddSingleton<IProducer<string, string>>(new ProducerBuilder<string, string>(kafkaConfig).Build());
+var kafkaConfig = new ProducerConfig { BootstrapServers = builder.Configuration["Kafka:Server"] };
+builder.Services.AddSingleton(new ProducerBuilder<string, string>(kafkaConfig).Build());
 builder.Services.AddScoped<IMessageProducer, MessageProducer>();
 
 builder.Services.Configure<ConnectionStrings>(builder.Configuration.GetSection("ConnectionStrings"));

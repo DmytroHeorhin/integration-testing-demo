@@ -1,3 +1,6 @@
+using System.Net.Http;
+using System.Threading.Tasks;
+
 namespace Domain.Remote
 {
     public class RemoteApiService : IRemoteApiService
@@ -9,9 +12,10 @@ namespace Domain.Remote
             _httpClient = httpClient;
         }
 
-        public async Task<string> FetchDataAsync()
+        public async Task<string> FetchDataAsync(string message)
         {
-            return await _httpClient.GetStringAsync("https://example.com");
+            var response = await _httpClient.GetStringAsync($"https://example.com/api?message={message}");
+            return response;
         }
     }
 }

@@ -2,6 +2,6 @@ namespace Domain.Remote
 {
     public interface IRemoteApiService
     {
-        Task<string> FetchDataAsync();
+        Task<string> FetchDataAsync(string message);
     }
 }

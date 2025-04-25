@@ -2,5 +2,5 @@ namespace Domain;
 
 public interface IDemoService
 {
-    Task<string> GetDemoMessageAsync();
+    Task SaveDemoMessageAsync(string message);
 }
