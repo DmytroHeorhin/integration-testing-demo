@@ -1,0 +1,7 @@
+Hey Github Copilot, please always follow these instructions:
+Put every type in a separate file named after the type name.
+Type namespace should match folder structure.
+When renaming types and namespaces, update all references in the solution.
+When making changes to code, update unit tests.
+Don't add comments to code.
+Reduce explanation of your actions.
