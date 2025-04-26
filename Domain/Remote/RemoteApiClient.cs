@@ -1,21 +1,18 @@
-using System.Net.Http;
-using System.Threading.Tasks;
-
 namespace Domain.Remote
 {
-    public class RemoteApiService : IRemoteApiService
+    public class RemoteApiClient : IRemoteApiClient
     {
         private readonly HttpClient _httpClient;
 
-        public RemoteApiService(HttpClient httpClient)
+        public RemoteApiClient(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
 
-        public async Task<string> FetchDataAsync(string message)
+        public async Task<int> GetOccurrenceCountAsync(string message)
         {
             var response = await _httpClient.GetStringAsync($"https://example.com/api?message={message}");
-            return response;
+            return int.Parse(response);
         }
     }
 }

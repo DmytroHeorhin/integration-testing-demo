@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Api.Controllers;
 
-public class CreateDemoRecordRequest
+public class CreateMessageRequest
 {
     [Required]
     [StringLength(100, MinimumLength = 1)]

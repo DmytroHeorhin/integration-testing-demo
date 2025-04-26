@@ -1,14 +1,14 @@
 using Confluent.Kafka;
 using Microsoft.Extensions.Configuration;
 
-namespace Domain.Messaging
+namespace Domain.Kafka
 {
-    public class MessageProducer : IMessageProducer
+    public class KafkaProducer : IKafkaProducer
     {
         private readonly IProducer<string, string> _producer;
         private readonly string _topic;
 
-        public MessageProducer(IProducer<string, string> producer, IConfiguration configuration)
+        public KafkaProducer(IProducer<string, string> producer, IConfiguration configuration)
         {
             _producer = producer;
             _topic = configuration["Kafka:Topic"];
