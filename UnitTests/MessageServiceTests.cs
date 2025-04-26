@@ -4,8 +4,6 @@ using Domain.Remote;
 using Domain.Repositories;
 using Domain.UserContext;
 using Moq;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace UnitTests
 {

@@ -1,5 +1,3 @@
-using System.Data;
-
 namespace Domain.Repositories
 {
     public class MessageRepository : IMessageRepository

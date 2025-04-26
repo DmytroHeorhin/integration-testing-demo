@@ -1,8 +1,5 @@
 using Domain.Repositories;
-using Microsoft.Extensions.Options;
 using Moq;
-using System.Threading.Tasks;
-using Xunit;
 
 namespace UnitTests
 {
