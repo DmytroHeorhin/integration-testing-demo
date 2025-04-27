@@ -2,8 +2,8 @@
 {
     internal interface IApplicationFixture
     {
+        void SetupDatabase();
         void CleanDatabase();
         void CleanKafkaMessages();
-        void SetupDatabase();
     }
 }
