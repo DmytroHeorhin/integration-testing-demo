@@ -1,9 +1,15 @@
 ﻿namespace IntegrationTests.Infrastructure
 {
-    internal class BaseTest<TApplicationFixture>(TApplicationFixture application)
+    internal class BaseTest<TApplicationFixture>
         : IClassFixture<TApplicationFixture>, IDisposable where TApplicationFixture : class, IApplicationFixture
     {
-        protected TApplicationFixture Application { get; } = application;
+        protected TApplicationFixture Application { get; }
+
+        public BaseTest(TApplicationFixture application)
+        {
+            Application = application;
+            Application.SetupDatabase();
+        }
 
         public void Dispose()
         {

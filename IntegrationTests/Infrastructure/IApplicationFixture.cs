@@ -4,5 +4,6 @@
     {
         void CleanDatabase();
         void CleanKafkaMessages();
+        void SetupDatabase();
     }
 }

@@ -1,15 +1,21 @@
-﻿using IntegrationTests.Infrastructure.Extensions;
+﻿using Domain.Repositories;
+using IntegrationTests.Infrastructure.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Options;
+using System.Data.SqlClient;
+using System.IO;
 
 namespace IntegrationTests.Infrastructure
 {
     public class ApplicationFixture : IApplicationFixture
     {
         protected WebApplicationFactory<Api.Program> Factory { get; init; }
+
+        protected SqlConnection DbConnection => new(Factory.Services.GetRequiredService<IOptions<ConnectionStrings>>().Value.Database);
 
         protected ApplicationFixture()
         {
@@ -37,12 +43,28 @@ namespace IntegrationTests.Infrastructure
 
         public void CleanDatabase()
         {
-            throw new NotImplementedException();
+            using var connection = DbConnection;
+            connection.Open();
+
+            using var truncateCommand = new SqlCommand("TRUNCATE TABLE users;", connection);
+            truncateCommand.ExecuteNonQuery();
         }
 
         public void CleanKafkaMessages()
         {
             throw new NotImplementedException();
+        }
+
+        public void SetupDatabase()
+        {
+            var scriptPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "database", "create_users_table.sql");
+            var script = File.ReadAllText(scriptPath);
+
+            using var connection = DbConnection;
+            connection.Open();
+
+            using var command = new SqlCommand(script, connection);
+            command.ExecuteNonQuery();
         }
     }
 }
