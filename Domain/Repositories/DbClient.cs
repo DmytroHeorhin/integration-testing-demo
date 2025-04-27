@@ -19,5 +19,11 @@ namespace Domain.Repositories
             using var connection = new SqlConnection(_connectionString);
             await connection.ExecuteAsync(query, parameters);
         }
+
+        public async Task<T> QuerySingleOrDefaultAsync<T>(string query, object parameters)
+        {
+            using var connection = new SqlConnection(_connectionString);
+            return await connection.QuerySingleOrDefaultAsync<T>(query, parameters);
+        }
     }
 }
