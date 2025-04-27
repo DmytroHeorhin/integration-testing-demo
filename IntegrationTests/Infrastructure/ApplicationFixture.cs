@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using IntegrationTests.Infrastructure.Extensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authorization.Policy;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
-using System.Data.Common;
 
 namespace IntegrationTests.Infrastructure
 {
@@ -17,22 +16,8 @@ namespace IntegrationTests.Infrastructure
             Factory = new WebApplicationFactory<Api.Program>()
                 .WithWebHostBuilder(builder =>
                 {
-                    builder.ConfigureServices(services =>
-                    {
-                        ConfigureServices(services);
-                    });
+                    builder.UseJsonConfigurationFile("appsettings.tests.json");
                 });
-        }
-
-        private void ConfigureServices(IServiceCollection services)
-        {
-            services.AddSingleton<DbConnection>(container =>
-            {
-                var connection = new SqliteConnection("DataSource=:memory:");
-                connection.Open();
-
-                return connection;
-            });
         }
 
         public ApiClient As(string email)
