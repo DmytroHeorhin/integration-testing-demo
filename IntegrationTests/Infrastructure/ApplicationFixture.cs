@@ -10,6 +10,8 @@ using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using System.Data.SqlClient;
 using System.IO;
+using Moq;
+using Domain.Remote;
 
 namespace IntegrationTests.Infrastructure
 {
@@ -21,12 +23,18 @@ namespace IntegrationTests.Infrastructure
 
         public FakeMessageProducer MessageProducer { get; } = new();
 
+        public Mock<IRemoteApiClient> RemoteApiClientMock { get; } = new();
+
         protected ApplicationFixture()
         {
             Factory = new WebApplicationFactory<Api.Program>()
                 .WithWebHostBuilder(builder =>
                 {
                     builder.UseJsonConfigurationFile("appsettings.tests.json");
+                    builder.ConfigureTestServices(services =>
+                    {
+                        services.AddScoped<IRemoteApiClient>(_ => RemoteApiClientMock.Object);
+                    });
                 });
         }
 
@@ -46,6 +54,13 @@ namespace IntegrationTests.Infrastructure
             return new ApiClient(httpClient);
         }
 
+        public void SetupRemoteApiOccurrenceCount(int count)
+        {
+            RemoteApiClientMock
+                .Setup(x => x.GetOccurrenceCountAsync(It.IsAny<string>()))
+                .ReturnsAsync(count);
+        }
+
         public void SetupDatabase()
         {
             var scriptPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "database", "create_users_table.sql");
@@ -56,6 +71,17 @@ namespace IntegrationTests.Infrastructure
 
             using var command = new SqlCommand(script, connection);
             command.ExecuteNonQuery();
+        }
+
+        public void ArrangeUser(int userId, string email)
+        {
+            using var connection = DbConnection;
+            connection.Open();
+            using var cmd = connection.CreateCommand();
+            cmd.CommandText = "INSERT INTO users (Id, Email) VALUES (@Id, @Email)";
+            cmd.Parameters.AddWithValue("@Id", userId);
+            cmd.Parameters.AddWithValue("@Email", email);
+            cmd.ExecuteNonQuery();
         }
 
         public void CleanDatabase()
