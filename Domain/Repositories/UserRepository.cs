@@ -2,9 +2,9 @@ namespace Domain.Repositories;
 
 public class UserRepository : IUserRepository
 {
-    private readonly IDbClient _dbClient;
+    private readonly ISqlServerClient _dbClient;
 
-    public UserRepository(IDbClient dbClient)
+    public UserRepository(ISqlServerClient dbClient)
     {
         _dbClient = dbClient ?? throw new ArgumentNullException(nameof(dbClient));
     }

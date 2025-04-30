@@ -9,7 +9,7 @@ public class UserRepositoryTests
     public async Task GetUserIdByEmailAsync_ReturnsCorrectUserId()
     {
         // Arrange
-        var mockDbClient = new Mock<IDbClient>();
+        var mockDbClient = new Mock<ISqlServerClient>();
         var repository = new UserRepository(mockDbClient.Object);
         var email = "test@example.com";
         var expectedUserId = 42;

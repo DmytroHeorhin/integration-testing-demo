@@ -4,23 +4,17 @@ using Dapper;
 
 namespace Domain.Repositories;
 
-public class DbClient : IDbClient
+public class SqlServerClient : ISqlServerClient
 {
     private readonly string _connectionString;
 
-    public DbClient(IOptions<ConnectionStrings> options)
+    public SqlServerClient(IOptions<ConnectionStrings> options)
     {
         _connectionString = options.Value.Database
                             ?? throw new ArgumentNullException(nameof(options), "Connection string cannot be null.");
     }
 
-    public async Task ExecuteAsync(string query, object parameters)
-    {
-        using var connection = new SqlConnection(_connectionString);
-        await connection.ExecuteAsync(query, parameters);
-    }
-
-    public async Task<T> QuerySingleOrDefaultAsync<T>(string query, object parameters)
+    public async Task<T?> QuerySingleOrDefaultAsync<T>(string query, object parameters)
     {
         using var connection = new SqlConnection(_connectionString);
         return await connection.QuerySingleOrDefaultAsync<T>(query, parameters);

@@ -36,7 +36,7 @@ public static class ServiceCollectionExtensions
         services.AddHttpClient<IRemoteApiClient, RemoteApiClient>();
 
         services.Configure<ConnectionStrings>(configuration.GetSection("ConnectionStrings"));
-        services.AddScoped<IDbClient, DbClient>();
+        services.AddScoped<ISqlServerClient, SqlServerClient>();
         services.AddScoped<IUserRepository, UserRepository>();
 
         services.AddHttpContextAccessor();
