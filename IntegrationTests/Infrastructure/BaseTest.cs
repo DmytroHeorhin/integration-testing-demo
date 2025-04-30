@@ -1,20 +1,19 @@
-﻿namespace IntegrationTests.Infrastructure
+﻿namespace IntegrationTests.Infrastructure;
+
+public class BaseTest<TApplicationFixture>
+    : IClassFixture<TApplicationFixture>, IDisposable where TApplicationFixture : class, IApplicationFixture
 {
-    public class BaseTest<TApplicationFixture>
-        : IClassFixture<TApplicationFixture>, IDisposable where TApplicationFixture : class, IApplicationFixture
+    protected TApplicationFixture Application { get; }
+
+    public BaseTest(TApplicationFixture application)
     {
-        protected TApplicationFixture Application { get; }
+        Application = application;
+        Application.SetupDatabase();
+    }
 
-        public BaseTest(TApplicationFixture application)
-        {
-            Application = application;
-            Application.SetupDatabase();
-        }
-
-        public void Dispose()
-        {
-            Application.CleanDatabase();
-            Application.CleanKafkaMessages();
-        }
+    public void Dispose()
+    {
+        Application.CleanDatabase();
+        Application.CleanKafkaMessages();
     }
 }

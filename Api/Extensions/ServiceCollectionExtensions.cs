@@ -5,6 +5,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using Domain.Kafka;
+using Domain;
+using System.Text.Json;
+using Domain.UserContext;
 
 namespace Api.Extensions;
 
@@ -36,9 +39,18 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IDbClient, DbClient>();
         services.AddScoped<IUserRepository, UserRepository>();
 
+        services.AddHttpContextAccessor();
+        services.AddScoped<IUserContext, UserContext>();
+
         services.Configure<KafkaOptions>(configuration.GetSection("Kafka"));
-        var kafkaConfig = new ProducerConfig { BootstrapServers = configuration["Kafka:Server"] };
-        services.AddSingleton(new ProducerBuilder<string, string>(kafkaConfig).Build());
-        services.AddScoped<IMessageProducer, MessageProducer>();
+        services.AddSingleton<IProducer<string, Domain.Kafka.Note>>(sp =>
+        {
+            var config = new ProducerConfig { BootstrapServers = configuration["Kafka:Server"] };
+            return new ProducerBuilder<string, Domain.Kafka.Note>(config)
+                .SetValueSerializer(new NoteSerializer())
+                .Build();
+        });
+        services.AddScoped<INoteProducer, NoteProducer>();
+        services.AddScoped<INoteService, NoteService>();
     }
 }

@@ -1,9 +1,8 @@
-﻿namespace IntegrationTests.Infrastructure
+﻿namespace IntegrationTests.Infrastructure;
+
+public interface IApplicationFixture
 {
-    internal interface IApplicationFixture
-    {
-        void SetupDatabase();
-        void CleanDatabase();
-        void CleanKafkaMessages();
-    }
+    void SetupDatabase();
+    void CleanDatabase();
+    void CleanKafkaMessages();
 }

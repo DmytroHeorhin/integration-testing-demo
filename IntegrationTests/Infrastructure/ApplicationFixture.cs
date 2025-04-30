@@ -9,93 +9,91 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 using System.Data.SqlClient;
-using System.IO;
 using Moq;
 using Domain.Remote;
 
-namespace IntegrationTests.Infrastructure
+namespace IntegrationTests.Infrastructure;
+
+public class ApplicationFixture : IApplicationFixture
 {
-    public class ApplicationFixture : IApplicationFixture
+    protected WebApplicationFactory<Api.Program> Factory { get; init; }
+
+    protected SqlConnection DbConnection => new(Factory.Services.GetRequiredService<IOptions<ConnectionStrings>>().Value.Database);
+
+    public FakeNoteProducer NoteProducer { get; } = new();
+
+    public Mock<IRemoteApiClient> RemoteApiClientMock { get; } = new();
+
+    public ApplicationFixture()
     {
-        protected WebApplicationFactory<Api.Program> Factory { get; init; }
-
-        protected SqlConnection DbConnection => new(Factory.Services.GetRequiredService<IOptions<ConnectionStrings>>().Value.Database);
-
-        public FakeMessageProducer MessageProducer { get; } = new();
-
-        public Mock<IRemoteApiClient> RemoteApiClientMock { get; } = new();
-
-        protected ApplicationFixture()
-        {
-            Factory = new WebApplicationFactory<Api.Program>()
-                .WithWebHostBuilder(builder =>
+        Factory = new WebApplicationFactory<Api.Program>()
+            .WithWebHostBuilder(builder =>
+            {
+                builder.UseJsonConfigurationFile("appsettings.tests.json");
+                builder.ConfigureTestServices(services =>
                 {
-                    builder.UseJsonConfigurationFile("appsettings.tests.json");
-                    builder.ConfigureTestServices(services =>
-                    {
-                        services.AddScoped<IRemoteApiClient>(_ => RemoteApiClientMock.Object);
-                    });
+                    services.AddScoped<IRemoteApiClient>(_ => RemoteApiClientMock.Object);
                 });
-        }
+            });
+    }
 
-        public ApiClient As(string email)
-        {
-            var httpClient = Factory
-                .WithWebHostBuilder(builder =>
+    public ApiClient As(string email)
+    {
+        var httpClient = Factory
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
                 {
-                    builder.ConfigureTestServices(services =>
-                    {
-                        services.AddScoped<IPolicyEvaluator>(sp => new TestPolicyEvaluator(sp.GetRequiredService<IAuthorizationService>(), email));
-                        services.Replace(new ServiceDescriptor(typeof(IMessageProducer), _ => MessageProducer, ServiceLifetime.Singleton));
-                    });
-                })
-                .CreateClient();
+                    services.AddScoped<IPolicyEvaluator>(sp => new TestPolicyEvaluator(sp.GetRequiredService<IAuthorizationService>(), email));
+                    services.Replace(new ServiceDescriptor(typeof(INoteProducer), _ => NoteProducer, ServiceLifetime.Singleton));
+                });
+            })
+            .CreateClient();
 
-            return new ApiClient(httpClient);
-        }
+        return new ApiClient(httpClient);
+    }
 
-        public void SetupRemoteApiOccurrenceCount(int count)
-        {
-            RemoteApiClientMock
-                .Setup(x => x.GetOccurrenceCountAsync(It.IsAny<string>()))
-                .ReturnsAsync(count);
-        }
+    public void SetupRemoteApiScore(int score)
+    {
+        RemoteApiClientMock
+            .Setup(x => x.GetScoreAsync(It.IsAny<string>()))
+            .ReturnsAsync(score);
+    }
 
-        public void SetupDatabase()
-        {
-            var scriptPath = Path.Combine(AppContext.BaseDirectory, "..", "..", "..", "database", "create_users_table.sql");
-            var script = File.ReadAllText(scriptPath);
+    public void SetupDatabase()
+    {
+        var scriptPath = Path.Combine(AppContext.BaseDirectory, "create_users_table.sql");
+        var script = File.ReadAllText(scriptPath);
 
-            using var connection = DbConnection;
-            connection.Open();
+        using var connection = DbConnection;
+        connection.Open();
 
-            using var command = new SqlCommand(script, connection);
-            command.ExecuteNonQuery();
-        }
+        using var command = new SqlCommand(script, connection);
+        command.ExecuteNonQuery();
+    }
 
-        public void ArrangeUser(int userId, string email)
-        {
-            using var connection = DbConnection;
-            connection.Open();
-            using var cmd = connection.CreateCommand();
-            cmd.CommandText = "INSERT INTO users (Id, Email) VALUES (@Id, @Email)";
-            cmd.Parameters.AddWithValue("@Id", userId);
-            cmd.Parameters.AddWithValue("@Email", email);
-            cmd.ExecuteNonQuery();
-        }
+    public void ArrangeUser(int userId, string email)
+    {
+        using var connection = DbConnection;
+        connection.Open();
+        using var cmd = connection.CreateCommand();
+        cmd.CommandText = "INSERT INTO users (Id, Email) VALUES (@Id, @Email)";
+        cmd.Parameters.AddWithValue("@Id", userId);
+        cmd.Parameters.AddWithValue("@Email", email);
+        cmd.ExecuteNonQuery();
+    }
 
-        public void CleanDatabase()
-        {
-            using var connection = DbConnection;
-            connection.Open();
+    public void CleanDatabase()
+    {
+        using var connection = DbConnection;
+        connection.Open();
 
-            using var truncateCommand = new SqlCommand("TRUNCATE TABLE users;", connection);
-            truncateCommand.ExecuteNonQuery();
-        }
+        using var truncateCommand = new SqlCommand("TRUNCATE TABLE users;", connection);
+        truncateCommand.ExecuteNonQuery();
+    }
 
-        public void CleanKafkaMessages()
-        {
-            MessageProducer.CleanProducedEvents();
-        }
+    public void CleanKafkaMessages()
+    {
+        NoteProducer.CleanProducedMessages();
     }
 }

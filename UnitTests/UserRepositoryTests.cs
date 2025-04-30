@@ -1,6 +1,5 @@
 using Domain.Repositories;
 using Moq;
-using Xunit;
 
 namespace UnitTests;
 

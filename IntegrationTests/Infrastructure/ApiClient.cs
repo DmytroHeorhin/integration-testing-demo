@@ -1,22 +1,19 @@
-﻿using System.Net.Http;
-using System.Net.Http.Json;
-using System.Threading.Tasks;
+﻿using System.Net.Http.Json;
 using Api.Controllers;
 
-namespace IntegrationTests.Infrastructure
+namespace IntegrationTests.Infrastructure;
+
+public class ApiClient
 {
-    public class ApiClient
+    private readonly HttpClient _httpClient;
+
+    public ApiClient(HttpClient httpClient)
     {
-        private readonly HttpClient _httpClient;
+        _httpClient = httpClient;
+    }
 
-        public ApiClient(HttpClient httpClient)
-        {
-            _httpClient = httpClient;
-        }
-
-        public Task<HttpResponseMessage> CreateMessageAsync(string message)
-        {
-            return _httpClient.PostAsJsonAsync("/api/messages", new CreateMessageRequest { Message = message });
-        }
+    public Task<HttpResponseMessage> CreateNoteAsync(string note)
+    {
+        return _httpClient.PostAsJsonAsync("/api/notes", new CreateNoteRequest { Note = note });
     }
 }

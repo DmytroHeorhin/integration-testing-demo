@@ -1,7 +1,6 @@
-namespace Domain.Remote
+namespace Domain.Remote;
+
+public interface IRemoteApiClient
 {
-    public interface IRemoteApiClient
-    {
-        Task<int> GetOccurrenceCountAsync(string message);
-    }
+    Task<int> GetScoreAsync(string note);
 }
